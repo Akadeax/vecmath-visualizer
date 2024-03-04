@@ -25,6 +25,8 @@ add_custom_target(
 
 set(SOURCES
     "main.cpp"
+    "Core/VMVWindow.h" "Core/VMVWindow.cpp"
+    "VecmathVisualizer.h" "VecmathVisualizer.cpp"
 )
 
 # Create the executable
