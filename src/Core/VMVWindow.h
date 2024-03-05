@@ -19,6 +19,8 @@ namespace vmv
         VMVWindow& operator=(VMVWindow&&) noexcept = delete;
 
         bool ShouldClose();
+        void CreateWindowSurface(VkInstance instance, VkSurfaceKHR* surface);
+        VkExtent2D GetExtent();
 
       private:
         void InitWindow();

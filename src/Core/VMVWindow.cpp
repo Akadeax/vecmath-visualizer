@@ -1,4 +1,5 @@
 #include "VMVWindow.h"
+#include <stdexcept>
 
 vmv::VMVWindow::VMVWindow(int width, int height, std::string windowName)
     : m_Width{width}, m_Height{height}, m_WindowName{std::move(windowName)}
@@ -15,6 +16,19 @@ vmv::VMVWindow::~VMVWindow()
 bool vmv::VMVWindow::ShouldClose()
 {
     return glfwWindowShouldClose(m_pWindow);
+}
+
+void vmv::VMVWindow::CreateWindowSurface(VkInstance instance, VkSurfaceKHR* surface)
+{
+    if (glfwCreateWindowSurface(instance, m_pWindow, nullptr, surface) != VK_SUCCESS)
+    {
+        throw std::runtime_error("Failed to create window surface");
+    }
+}
+
+VkExtent2D vmv::VMVWindow::GetExtent()
+{
+    return {static_cast<uint32_t>(m_Width), static_cast<uint32_t>(m_Height)};
 }
 
 void vmv::VMVWindow::InitWindow()
