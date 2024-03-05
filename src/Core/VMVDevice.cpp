@@ -21,7 +21,8 @@ namespace vmv
         return VK_FALSE;
     }
 
-    VkResult CreateDebugUtilsMessengerEXT(VkInstance instance, const VkDebugUtilsMessengerCreateInfoEXT* pCreateInfo,
+    VkResult CreateDebugUtilsMessengerEXT(VkInstance instance,
+                                          const VkDebugUtilsMessengerCreateInfoEXT* pCreateInfo,
                                           const VkAllocationCallbacks* pAllocator,
                                           VkDebugUtilsMessengerEXT* pDebugMessenger)
     {
@@ -37,7 +38,8 @@ namespace vmv
         }
     }
 
-    void DestroyDebugUtilsMessengerEXT(VkInstance instance, VkDebugUtilsMessengerEXT debugMessenger,
+    void DestroyDebugUtilsMessengerEXT(VkInstance instance,
+                                       VkDebugUtilsMessengerEXT debugMessenger,
                                        const VkAllocationCallbacks* pAllocator)
     {
         auto func =
@@ -417,7 +419,8 @@ namespace vmv
         return details;
     }
 
-    VkFormat VMVDevice::findSupportedFormat(const std::vector<VkFormat>& candidates, VkImageTiling tiling,
+    VkFormat VMVDevice::findSupportedFormat(const std::vector<VkFormat>& candidates,
+                                            VkImageTiling tiling,
                                             VkFormatFeatureFlags features)
     {
         for (VkFormat format : candidates)
@@ -452,8 +455,11 @@ namespace vmv
         throw std::runtime_error("failed to find suitable memory type!");
     }
 
-    void VMVDevice::createBuffer(VkDeviceSize size, VkBufferUsageFlags usage, VkMemoryPropertyFlags properties,
-                                 VkBuffer& buffer, VkDeviceMemory& bufferMemory)
+    void VMVDevice::createBuffer(VkDeviceSize size,
+                                 VkBufferUsageFlags usage,
+                                 VkMemoryPropertyFlags properties,
+                                 VkBuffer& buffer,
+                                 VkDeviceMemory& bufferMemory)
     {
         VkBufferCreateInfo bufferInfo{};
         bufferInfo.sType = VK_STRUCTURE_TYPE_BUFFER_CREATE_INFO;
@@ -529,8 +535,8 @@ namespace vmv
         endSingleTimeCommands(commandBuffer);
     }
 
-    void VMVDevice::copyBufferToImage(VkBuffer buffer, VkImage image, uint32_t width, uint32_t height,
-                                      uint32_t layerCount)
+    void VMVDevice::copyBufferToImage(
+        VkBuffer buffer, VkImage image, uint32_t width, uint32_t height, uint32_t layerCount)
     {
         VkCommandBuffer commandBuffer = beginSingleTimeCommands();
 
@@ -551,8 +557,10 @@ namespace vmv
         endSingleTimeCommands(commandBuffer);
     }
 
-    void VMVDevice::createImageWithInfo(const VkImageCreateInfo& imageInfo, VkMemoryPropertyFlags properties,
-                                        VkImage& image, VkDeviceMemory& imageMemory)
+    void VMVDevice::createImageWithInfo(const VkImageCreateInfo& imageInfo,
+                                        VkMemoryPropertyFlags properties,
+                                        VkImage& image,
+                                        VkDeviceMemory& imageMemory)
     {
         if (vkCreateImage(device_, &imageInfo, nullptr, &image) != VK_SUCCESS)
         {

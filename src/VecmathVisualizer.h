@@ -2,6 +2,7 @@
 #define VMV_VECMATHVISUALIZER_H
 
 #include "Core/VMVDevice.h"
+#include "Core/VMVModel.h"
 #include "Core/VMVPipeline.h"
 #include "Core/VMVSwapChain.h"
 #include "Core/VMVWindow.h"
@@ -36,10 +37,14 @@ namespace vmv
         VkPipelineLayout m_PipelineLayout;
         std::vector<VkCommandBuffer> m_CommandBuffers;
 
+        std::unique_ptr<VMVModel> m_VMVModel;
+
         void CreatePipelineLayout();
         void CreatePipeline();
         void CreateCommandBuffers();
         void DrawFrame();
+
+        void LoadModels();
     };
 } // namespace vmv
 

@@ -2,6 +2,7 @@
 #define VMV_VMVPIPELINE_H
 
 #include "VMVDevice.h"
+#include "VMVModel.h"
 
 #include <string>
 #include <vector>
@@ -37,6 +38,8 @@ namespace vmv
         VMVPipeline& operator=(VMVPipeline&&) noexcept = delete;
 
         static PipelineConfigInfo DefaultPipelineConfigInfo(uint32_t width, uint32_t height);
+
+        void Bind(VkCommandBuffer commandBuffer);
 
       private:
         static std::vector<char> ReadFile(const std::string& filePath);

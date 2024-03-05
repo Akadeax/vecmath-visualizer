@@ -1,6 +1,11 @@
 # Source files
 set(SHADER_SOURCE_DIR "${CMAKE_CURRENT_SOURCE_DIR}/Shaders")
-set(SHADER_BINARY_DIR "${CMAKE_CURRENT_BINARY_DIR}/Shaders")
+set(SHADER_BINARY_DIR "${CMAKE_BINARY_DIR}/bin/Debug/Shaders")
+
+message("========${CMAKE_BINARY_DIR}")
+message("========${CMAKE_BUILD_TYPE}")
+
+set(CMAKE_RUNTIME_OUTPUT_DIRECTORY "${CMAKE_BINARY_DIR}/bin")
 
 file(GLOB_RECURSE GLSL_SOURCE_FILES
     "${SHADER_SOURCE_DIR}/*.frag"
@@ -30,7 +35,9 @@ set(SOURCES
     "Core/VMVPipeline.h" "Core/VMVPipeline.cpp"
     "Core/VMVDevice.h" "Core/VMVDevice.cpp"
     "Core/VMVSwapChain.h" "Core/VMVSwapChain.cpp"
+    "Core/VMVModel.h" "Core/VMVModel.cpp"
 )
+
 
 # Create the executable
 add_executable(${PROJECT_NAME} ${SOURCES} ${GLSL_SOURCE_FILES} )
