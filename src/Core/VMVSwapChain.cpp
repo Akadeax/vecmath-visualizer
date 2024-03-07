@@ -14,12 +14,15 @@ namespace vmv
 
     VMVSwapChain::VMVSwapChain(VMVDevice& deviceRef, VkExtent2D extent) : device{deviceRef}, windowExtent{extent}
     {
-        createSwapChain();
-        createImageViews();
-        createRenderPass();
-        createDepthResources();
-        createFramebuffers();
-        createSyncObjects();
+        Init();
+    }
+    VMVSwapChain::VMVSwapChain(VMVDevice& deviceRef, VkExtent2D extent, std::unique_ptr<VMVSwapChain> pOldSwapChain)
+        : device{deviceRef}, windowExtent{extent}, pOldSwapChain{std::move(pOldSwapChain)}
+    {
+        Init();
+
+        // Clean up old swap chain since it's no longer needed
+        pOldSwapChain = nullptr;
     }
 
     VMVSwapChain::~VMVSwapChain()
@@ -124,6 +127,16 @@ namespace vmv
         return result;
     }
 
+    void VMVSwapChain::Init()
+    {
+        createSwapChain();
+        createImageViews();
+        createRenderPass();
+        createDepthResources();
+        createFramebuffers();
+        createSyncObjects();
+    }
+
     void VMVSwapChain::createSwapChain()
     {
         SwapChainSupportDetails swapChainSupport = device.getSwapChainSupport();
@@ -171,7 +184,7 @@ namespace vmv
         createInfo.presentMode = presentMode;
         createInfo.clipped = VK_TRUE;
 
-        createInfo.oldSwapchain = VK_NULL_HANDLE;
+        createInfo.oldSwapchain = pOldSwapChain == nullptr ? VK_NULL_HANDLE : pOldSwapChain->swapChain;
 
         if (vkCreateSwapchainKHR(device.device(), &createInfo, nullptr, &swapChain) != VK_SUCCESS)
         {

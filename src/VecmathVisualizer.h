@@ -28,12 +28,16 @@ namespace vmv
         void Run();
 
       private:
+        struct SimplePushConstantData
+        {
+            alignas(16) glm::vec3 color;
+            alignas(8) glm::vec2 offset;
+        };
+
         VMVWindow m_VMVWindow{WIDTH, HEIGHT, "Hello Vulkan!"};
         VMVDevice m_VMVDevice{m_VMVWindow};
-        VMVSwapChain m_VMVSwapChain{m_VMVDevice, m_VMVWindow.GetExtent()};
-
+        std::unique_ptr<VMVSwapChain> m_pVMVSwapChain;
         std::unique_ptr<VMVPipeline> m_pVMVPipeline;
-
         VkPipelineLayout m_PipelineLayout;
         std::vector<VkCommandBuffer> m_CommandBuffers;
 
@@ -42,7 +46,10 @@ namespace vmv
         void CreatePipelineLayout();
         void CreatePipeline();
         void CreateCommandBuffers();
+        void FreeCommandBuffers();
         void DrawFrame();
+        void RecreateSwapChain();
+        void RecordCommandBuffer(int imageIndex);
 
         void LoadModels();
     };

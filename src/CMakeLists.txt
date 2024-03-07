@@ -38,7 +38,6 @@ set(SOURCES
     "Core/VMVModel.h" "Core/VMVModel.cpp"
 )
 
-
 # Create the executable
 add_executable(${PROJECT_NAME} ${SOURCES} ${GLSL_SOURCE_FILES} )
 add_dependencies(${PROJECT_NAME} Shaders)

@@ -6,6 +6,7 @@
 #include <vulkan/vulkan.h>
 
 // std lib headers
+#include <memory>
 #include <string>
 #include <vector>
 
@@ -18,43 +19,20 @@ namespace vmv
         static constexpr int MAX_FRAMES_IN_FLIGHT = 2;
 
         VMVSwapChain(VMVDevice& deviceRef, VkExtent2D windowExtent);
+        VMVSwapChain(VMVDevice& deviceRef, VkExtent2D windowExtent, std::unique_ptr<VMVSwapChain> pOldSwapChain);
         ~VMVSwapChain();
 
         VMVSwapChain(const VMVSwapChain&) = delete;
         void operator=(const VMVSwapChain&) = delete;
 
-        VkFramebuffer getFrameBuffer(int index)
-        {
-            return swapChainFramebuffers[index];
-        }
-        VkRenderPass getRenderPass()
-        {
-            return renderPass;
-        }
-        VkImageView getImageView(int index)
-        {
-            return swapChainImageViews[index];
-        }
-        size_t imageCount()
-        {
-            return swapChainImages.size();
-        }
-        VkFormat getSwapChainImageFormat()
-        {
-            return swapChainImageFormat;
-        }
-        VkExtent2D getSwapChainExtent()
-        {
-            return swapChainExtent;
-        }
-        uint32_t width()
-        {
-            return swapChainExtent.width;
-        }
-        uint32_t height()
-        {
-            return swapChainExtent.height;
-        }
+        VkFramebuffer getFrameBuffer(int index) { return swapChainFramebuffers[index]; }
+        VkRenderPass getRenderPass() { return renderPass; }
+        VkImageView getImageView(int index) { return swapChainImageViews[index]; }
+        size_t imageCount() { return swapChainImages.size(); }
+        VkFormat getSwapChainImageFormat() { return swapChainImageFormat; }
+        VkExtent2D getSwapChainExtent() { return swapChainExtent; }
+        uint32_t width() { return swapChainExtent.width; }
+        uint32_t height() { return swapChainExtent.height; }
 
         float extentAspectRatio()
         {
@@ -66,6 +44,8 @@ namespace vmv
         VkResult submitCommandBuffers(const VkCommandBuffer* buffers, uint32_t* imageIndex);
 
       private:
+        void Init();
+
         void createSwapChain();
         void createImageViews();
         void createDepthResources();
@@ -94,6 +74,7 @@ namespace vmv
         VkExtent2D windowExtent;
 
         VkSwapchainKHR swapChain;
+        std::shared_ptr<VMVSwapChain> pOldSwapChain;
 
         std::vector<VkSemaphore> imageAvailableSemaphores;
         std::vector<VkSemaphore> renderFinishedSemaphores;
