@@ -16,7 +16,7 @@ namespace vmv
     {
         Init();
     }
-    VMVSwapChain::VMVSwapChain(VMVDevice& deviceRef, VkExtent2D extent, std::unique_ptr<VMVSwapChain> pOldSwapChain)
+    VMVSwapChain::VMVSwapChain(VMVDevice& deviceRef, VkExtent2D extent, std::shared_ptr<VMVSwapChain> pOldSwapChain)
         : device{deviceRef}, windowExtent{extent}, pOldSwapChain{std::move(pOldSwapChain)}
     {
         Init();
@@ -316,6 +316,8 @@ namespace vmv
     void VMVSwapChain::createDepthResources()
     {
         VkFormat depthFormat = findDepthFormat();
+        swapChainDepthFormat = depthFormat;
+
         VkExtent2D swapChainExtent = getSwapChainExtent();
 
         depthImages.resize(imageCount());
@@ -408,7 +410,6 @@ namespace vmv
         {
             if (availablePresentMode == VK_PRESENT_MODE_MAILBOX_KHR)
             {
-                std::cout << "Present mode: Mailbox" << std::endl;
                 return availablePresentMode;
             }
         }
@@ -420,7 +421,6 @@ namespace vmv
         //   }
         // }
 
-        std::cout << "Present mode: V-Sync" << std::endl;
         return VK_PRESENT_MODE_FIFO_KHR;
     }
 

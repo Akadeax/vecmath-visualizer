@@ -13,13 +13,13 @@
 namespace vmv
 {
 
-    class VMVSwapChain
+    class VMVSwapChain final
     {
       public:
         static constexpr int MAX_FRAMES_IN_FLIGHT = 2;
 
         VMVSwapChain(VMVDevice& deviceRef, VkExtent2D windowExtent);
-        VMVSwapChain(VMVDevice& deviceRef, VkExtent2D windowExtent, std::unique_ptr<VMVSwapChain> pOldSwapChain);
+        VMVSwapChain(VMVDevice& deviceRef, VkExtent2D windowExtent, std::shared_ptr<VMVSwapChain> pOldSwapChain);
         ~VMVSwapChain();
 
         VMVSwapChain(const VMVSwapChain&) = delete;
@@ -43,6 +43,12 @@ namespace vmv
         VkResult acquireNextImage(uint32_t* imageIndex);
         VkResult submitCommandBuffers(const VkCommandBuffer* buffers, uint32_t* imageIndex);
 
+        bool CompareSwapFormats(const VMVSwapChain& swapChain) const
+        {
+            return swapChain.swapChainImageFormat == swapChainImageFormat &&
+                   swapChain.swapChainDepthFormat == swapChainDepthFormat;
+        }
+
       private:
         void Init();
 
@@ -59,6 +65,8 @@ namespace vmv
         VkExtent2D chooseSwapExtent(const VkSurfaceCapabilitiesKHR& capabilities);
 
         VkFormat swapChainImageFormat;
+        VkFormat swapChainDepthFormat;
+
         VkExtent2D swapChainExtent;
 
         std::vector<VkFramebuffer> swapChainFramebuffers;

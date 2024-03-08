@@ -9,7 +9,7 @@
 
 namespace vmv
 {
-    struct PipelineConfigInfo
+    struct PipelineConfigInfo final
     {
         PipelineConfigInfo() = default;
         PipelineConfigInfo(const PipelineConfigInfo&) = delete;
@@ -31,7 +31,7 @@ namespace vmv
         uint32_t subpass{0};
     };
 
-    class VMVPipeline
+    class VMVPipeline final
     {
       public:
         VMVPipeline(VMVDevice& device,

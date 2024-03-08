@@ -1,10 +1,11 @@
 #ifndef VMV_VECMATHVISUALIZER_H
 #define VMV_VECMATHVISUALIZER_H
 
+#include "Core/VMVCamera.h"
 #include "Core/VMVDevice.h"
+#include "Core/VMVGameObject.h"
 #include "Core/VMVModel.h"
-#include "Core/VMVPipeline.h"
-#include "Core/VMVSwapChain.h"
+#include "Core/VMVRenderer.h"
 #include "Core/VMVWindow.h"
 #include <memory>
 #include <vector>
@@ -28,30 +29,13 @@ namespace vmv
         void Run();
 
       private:
-        struct SimplePushConstantData
-        {
-            alignas(16) glm::vec3 color;
-            alignas(8) glm::vec2 offset;
-        };
-
         VMVWindow m_VMVWindow{WIDTH, HEIGHT, "Hello Vulkan!"};
         VMVDevice m_VMVDevice{m_VMVWindow};
-        std::unique_ptr<VMVSwapChain> m_pVMVSwapChain;
-        std::unique_ptr<VMVPipeline> m_pVMVPipeline;
-        VkPipelineLayout m_PipelineLayout;
-        std::vector<VkCommandBuffer> m_CommandBuffers;
+        VMVRenderer m_VMVRenderer{m_VMVWindow, m_VMVDevice};
 
-        std::unique_ptr<VMVModel> m_VMVModel;
+        std::vector<VMVGameObject> m_GameObjects;
 
-        void CreatePipelineLayout();
-        void CreatePipeline();
-        void CreateCommandBuffers();
-        void FreeCommandBuffers();
-        void DrawFrame();
-        void RecreateSwapChain();
-        void RecordCommandBuffer(int imageIndex);
-
-        void LoadModels();
+        void LoadGameObjects();
     };
 } // namespace vmv
 

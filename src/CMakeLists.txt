@@ -36,6 +36,10 @@ set(SOURCES
     "Core/VMVDevice.h" "Core/VMVDevice.cpp"
     "Core/VMVSwapChain.h" "Core/VMVSwapChain.cpp"
     "Core/VMVModel.h" "Core/VMVModel.cpp"
+    "Core/VMVGameObject.h" "Core/VMVGameObject.cpp"
+    "Core/VMVRenderer.h" "Core/VMVRenderer.cpp"
+    "Core/SimpleRenderSystem.h" "Core/SimpleRenderSystem.cpp"
+    "Core/VMVCamera.h" "Core/VMVCamera.cpp"
 )
 
 # Create the executable
