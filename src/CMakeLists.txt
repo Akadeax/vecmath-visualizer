@@ -39,6 +39,8 @@ set(SOURCES
     "Core/SimpleRenderSystem.h" "Core/SimpleRenderSystem.cpp"
     "Core/VMVCamera.h" "Core/VMVCamera.cpp"
     "Core/VMVUtils.h"
+    "Core/VMVBuffer.h" "Core/VMVBuffer.cpp"
+    "Core/VMVFrameInfo.h"
 )
 
 # Create the executable

@@ -4,6 +4,8 @@
 #include <stdexcept>
 
 #include "Core/SimpleRenderSystem.h"
+#include "Core/VMVBuffer.h"
+#include "Core/VMVFrameInfo.h"
 #include "Core/VMVModel.h"
 #include "KeyboardMovementController.h"
 
@@ -20,6 +22,20 @@ vmv::VecmathVisualizer::~VecmathVisualizer() {}
 
 void vmv::VecmathVisualizer::Run()
 {
+    std::vector<std::unique_ptr<VMVBuffer>> globalUboBuffers(VMVSwapChain::MAX_FRAMES_IN_FLIGHT);
+    for (size_t i{0}; i < globalUboBuffers.size(); ++i)
+    {
+        globalUboBuffers[i] =
+            std::make_unique<VMVBuffer>(m_VMVDevice,
+                                        sizeof(GlobalUbo),
+                                        1,
+                                        VK_BUFFER_USAGE_UNIFORM_BUFFER_BIT,
+                                        VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT,
+                                        m_VMVDevice.properties.limits.minUniformBufferOffsetAlignment);
+
+        globalUboBuffers[i]->map();
+    }
+
     SimpleRenderSystem renderSystem{m_VMVDevice, m_VMVRenderer.GetSwapChainRenderPass()};
 
     VMVGameObject viewer{VMVGameObject::CreateGameObject()};
@@ -46,8 +62,19 @@ void vmv::VecmathVisualizer::Run()
 
         if (VkCommandBuffer commandBuffer{m_VMVRenderer.BeginFrame()})
         {
+            int frameIndex{m_VMVRenderer.GetFrameIndex()};
+            VMVFrameInfo frameInfo{frameIndex, frameTime, commandBuffer, camera};
+
+            // update
+            GlobalUbo ubo{};
+            ubo.projectionView = camera.GetProjection() * camera.GetView();
+
+            globalUboBuffers[frameIndex]->writeToBuffer(&ubo);
+            globalUboBuffers[frameIndex]->flush();
+
+            // render
             m_VMVRenderer.BeginSwapChainRenderPass(commandBuffer);
-            renderSystem.DrawGameObjects(commandBuffer, m_GameObjects, camera);
+            renderSystem.DrawGameObjects(frameInfo, m_GameObjects);
             m_VMVRenderer.EndSwapChainRenderPass(commandBuffer);
 
             m_VMVRenderer.EndFrame();

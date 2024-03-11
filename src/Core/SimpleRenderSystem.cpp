@@ -52,13 +52,11 @@ void vmv::SimpleRenderSystem::CreatePipeline(VkRenderPass renderPass)
         m_VMVDevice, pipelineConfig, "Shaders/simple_shader.vert.spv", "Shaders/simple_shader.frag.spv");
 }
 
-void vmv::SimpleRenderSystem::DrawGameObjects(VkCommandBuffer commandBuffer,
-                                              std::vector<VMVGameObject>& gameObjects,
-                                              const VMVCamera& camera)
+void vmv::SimpleRenderSystem::DrawGameObjects(VMVFrameInfo& frameInfo, std::vector<VMVGameObject>& gameObjects)
 {
-    m_pVMVPipeline->Bind(commandBuffer);
+    m_pVMVPipeline->Bind(frameInfo.commandBuffer);
 
-    glm::mat4 projectionView{camera.GetProjection() * camera.GetView()};
+    glm::mat4 projectionView{frameInfo.camera.GetProjection() * frameInfo.camera.GetView()};
 
     for (VMVGameObject& go : gameObjects)
     {
@@ -66,14 +64,14 @@ void vmv::SimpleRenderSystem::DrawGameObjects(VkCommandBuffer commandBuffer,
         push.transform = projectionView * go.m_Transform.GetMat();
         push.normalMatrix = go.m_Transform.NormalMatrix();
 
-        vkCmdPushConstants(commandBuffer,
+        vkCmdPushConstants(frameInfo.commandBuffer,
                            m_PipelineLayout,
                            VK_SHADER_STAGE_VERTEX_BIT | VK_SHADER_STAGE_FRAGMENT_BIT,
                            0,
                            sizeof(SimplePushConstantData),
                            &push);
 
-        go.m_Model->Bind(commandBuffer);
-        go.m_Model->Draw(commandBuffer);
+        go.m_Model->Bind(frameInfo.commandBuffer);
+        go.m_Model->Draw(frameInfo.commandBuffer);
     }
 }

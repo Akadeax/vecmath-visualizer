@@ -31,17 +31,7 @@ vmv::VMVModel::VMVModel(VMVDevice& device, const Builder& builder) : m_VMVDevice
     CreateIndexBuffers(builder.indices);
 }
 
-vmv::VMVModel::~VMVModel()
-{
-    vkDestroyBuffer(m_VMVDevice.device(), m_VertexBuffer, nullptr);
-    vkFreeMemory(m_VMVDevice.device(), m_VertexBufferMemory, nullptr);
-
-    if (m_HasIndexBuffer)
-    {
-        vkDestroyBuffer(m_VMVDevice.device(), m_IndexBuffer, nullptr);
-        vkFreeMemory(m_VMVDevice.device(), m_IndexBufferMemory, nullptr);
-    }
-}
+vmv::VMVModel::~VMVModel() {}
 
 std::unique_ptr<vmv::VMVModel> vmv::VMVModel::CreateModelFromFile(VMVDevice& device, const std::string& filePath)
 {
@@ -53,13 +43,13 @@ std::unique_ptr<vmv::VMVModel> vmv::VMVModel::CreateModelFromFile(VMVDevice& dev
 
 void vmv::VMVModel::Bind(VkCommandBuffer commandBuffer)
 {
-    VkBuffer buffers[] = {m_VertexBuffer};
+    VkBuffer buffers[] = {m_VertexBuffer->getBuffer()};
     VkDeviceSize offsets[] = {0};
     vkCmdBindVertexBuffers(commandBuffer, 0, 1, buffers, offsets);
 
     if (m_HasIndexBuffer)
     {
-        vkCmdBindIndexBuffer(commandBuffer, m_IndexBuffer, 0, VK_INDEX_TYPE_UINT32);
+        vkCmdBindIndexBuffer(commandBuffer, m_IndexBuffer->getBuffer(), 0, VK_INDEX_TYPE_UINT32);
     }
 }
 
@@ -75,37 +65,32 @@ void vmv::VMVModel::Draw(VkCommandBuffer commandBuffer)
     }
 }
 
-void vmv::VMVModel::CreateVertexBuffers(const std::vector<Vertex>& indices)
+void vmv::VMVModel::CreateVertexBuffers(const std::vector<Vertex>& vertices)
 {
-    m_VertexCount = static_cast<uint32_t>(indices.size());
+    m_VertexCount = static_cast<uint32_t>(vertices.size());
     assert(m_VertexCount >= 3 && "Model has less than 3 indices!");
 
-    VkDeviceSize bufferSize{sizeof(indices[0]) * m_VertexCount};
+    VkDeviceSize bufferSize{sizeof(vertices[0]) * m_VertexCount};
+    uint32_t vertexSize{sizeof(vertices[0])};
 
-    VkBuffer stagingBuffer;
-    VkDeviceMemory stagingBufferMemory;
+    VMVBuffer stagingBuffer{
+        m_VMVDevice,
+        vertexSize,
+        m_VertexCount,
+        VK_BUFFER_USAGE_TRANSFER_SRC_BIT,
+        VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT | VK_MEMORY_PROPERTY_HOST_COHERENT_BIT,
+    };
 
-    m_VMVDevice.createBuffer(bufferSize,
-                             VK_BUFFER_USAGE_TRANSFER_SRC_BIT,
-                             VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT | VK_MEMORY_PROPERTY_HOST_COHERENT_BIT,
-                             stagingBuffer,
-                             stagingBufferMemory);
+    stagingBuffer.map();
+    stagingBuffer.writeToBuffer((void*)vertices.data());
 
-    void* data;
-    vkMapMemory(m_VMVDevice.device(), stagingBufferMemory, 0, bufferSize, 0, &data);
-    memcpy(data, indices.data(), static_cast<size_t>(bufferSize));
-    vkUnmapMemory(m_VMVDevice.device(), stagingBufferMemory);
+    m_VertexBuffer = std::make_unique<VMVBuffer>(m_VMVDevice,
+                                                 vertexSize,
+                                                 m_VertexCount,
+                                                 VK_BUFFER_USAGE_VERTEX_BUFFER_BIT | VK_BUFFER_USAGE_TRANSFER_DST_BIT,
+                                                 VK_MEMORY_PROPERTY_DEVICE_LOCAL_BIT);
 
-    m_VMVDevice.createBuffer(bufferSize,
-                             VK_BUFFER_USAGE_VERTEX_BUFFER_BIT | VK_BUFFER_USAGE_TRANSFER_DST_BIT,
-                             VK_MEMORY_PROPERTY_DEVICE_LOCAL_BIT,
-                             m_VertexBuffer,
-                             m_VertexBufferMemory);
-
-    m_VMVDevice.copyBuffer(stagingBuffer, m_VertexBuffer, bufferSize);
-
-    vkDestroyBuffer(m_VMVDevice.device(), stagingBuffer, nullptr);
-    vkFreeMemory(m_VMVDevice.device(), stagingBufferMemory, nullptr);
+    m_VMVDevice.copyBuffer(stagingBuffer.getBuffer(), m_VertexBuffer->getBuffer(), bufferSize);
 }
 
 void vmv::VMVModel::CreateIndexBuffers(const std::vector<uint32_t>& indices)
@@ -117,30 +102,26 @@ void vmv::VMVModel::CreateIndexBuffers(const std::vector<uint32_t>& indices)
         return;
 
     VkDeviceSize bufferSize{sizeof(indices[0]) * m_IndexCount};
-    VkBuffer stagingBuffer;
-    VkDeviceMemory stagingBufferMemory;
+    uint32_t indexSize{sizeof(indices[0])};
 
-    m_VMVDevice.createBuffer(bufferSize,
-                             VK_BUFFER_USAGE_TRANSFER_SRC_BIT,
-                             VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT | VK_MEMORY_PROPERTY_HOST_COHERENT_BIT,
-                             stagingBuffer,
-                             stagingBufferMemory);
+    VMVBuffer stagingBuffer{
+        m_VMVDevice,
+        indexSize,
+        m_IndexCount,
+        VK_BUFFER_USAGE_TRANSFER_SRC_BIT,
+        VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT | VK_MEMORY_PROPERTY_HOST_COHERENT_BIT,
+    };
 
-    void* data;
-    vkMapMemory(m_VMVDevice.device(), stagingBufferMemory, 0, bufferSize, 0, &data);
-    memcpy(data, indices.data(), static_cast<size_t>(bufferSize));
-    vkUnmapMemory(m_VMVDevice.device(), stagingBufferMemory);
+    stagingBuffer.map();
+    stagingBuffer.writeToBuffer((void*)indices.data());
 
-    m_VMVDevice.createBuffer(bufferSize,
-                             VK_BUFFER_USAGE_INDEX_BUFFER_BIT | VK_BUFFER_USAGE_TRANSFER_DST_BIT,
-                             VK_MEMORY_PROPERTY_DEVICE_LOCAL_BIT,
-                             m_IndexBuffer,
-                             m_IndexBufferMemory);
+    m_IndexBuffer = std::make_unique<VMVBuffer>(m_VMVDevice,
+                                                indexSize,
+                                                m_IndexCount,
+                                                VK_BUFFER_USAGE_INDEX_BUFFER_BIT | VK_BUFFER_USAGE_TRANSFER_DST_BIT,
+                                                VK_MEMORY_PROPERTY_DEVICE_LOCAL_BIT);
 
-    m_VMVDevice.copyBuffer(stagingBuffer, m_IndexBuffer, bufferSize);
-
-    vkDestroyBuffer(m_VMVDevice.device(), stagingBuffer, nullptr);
-    vkFreeMemory(m_VMVDevice.device(), stagingBufferMemory, nullptr);
+    m_VMVDevice.copyBuffer(stagingBuffer.getBuffer(), m_IndexBuffer->getBuffer(), bufferSize);
 }
 
 std::vector<VkVertexInputBindingDescription> vmv::VMVModel::Vertex::GetBindingDescriptions()

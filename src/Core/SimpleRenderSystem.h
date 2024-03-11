@@ -3,6 +3,7 @@
 
 #include "VMVCamera.h"
 #include "VMVDevice.h"
+#include "VMVFrameInfo.h"
 #include "VMVGameObject.h"
 #include "VMVPipeline.h"
 
@@ -22,9 +23,7 @@ namespace vmv
         SimpleRenderSystem& operator=(const SimpleRenderSystem&) = delete;
         SimpleRenderSystem& operator=(SimpleRenderSystem&&) noexcept = delete;
 
-        void DrawGameObjects(VkCommandBuffer commandBuffer,
-                             std::vector<VMVGameObject>& gameObjects,
-                             const VMVCamera& camera);
+        void DrawGameObjects(VMVFrameInfo& frameInfo, std::vector<VMVGameObject>& gameObjects);
 
       private:
         struct SimplePushConstantData

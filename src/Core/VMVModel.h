@@ -1,6 +1,7 @@
 #ifndef VMV_VMVMODEL_H
 #define VMV_VMVMODEL_H
 
+#include "VMVBuffer.h"
 #include "VMVDevice.h"
 #define GLM_FORCE_RADIANS
 #define GLM_FORCE_DEPTH_ZERO_TO_ONE
@@ -52,15 +53,13 @@ namespace vmv
       private:
         VMVDevice& m_VMVDevice;
 
-        VkBuffer m_VertexBuffer;
-        VkDeviceMemory m_VertexBufferMemory;
+        std::unique_ptr<VMVBuffer> m_VertexBuffer;
         uint32_t m_VertexCount;
 
         void CreateVertexBuffers(const std::vector<Vertex>& vertices);
 
         bool m_HasIndexBuffer{false};
-        VkBuffer m_IndexBuffer;
-        VkDeviceMemory m_IndexBufferMemory;
+        std::unique_ptr<VMVBuffer> m_IndexBuffer;
         uint32_t m_IndexCount;
 
         void CreateIndexBuffers(const std::vector<uint32_t>& indices);
