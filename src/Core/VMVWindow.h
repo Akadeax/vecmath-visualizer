@@ -21,7 +21,7 @@ namespace vmv
         bool ShouldClose();
         void CreateWindowSurface(VkInstance instance, VkSurfaceKHR* surface);
         VkExtent2D GetExtent();
-
+        GLFWwindow* GetWindow() { return m_pWindow; }
         bool WasWindowResized() { return m_FrameBufferResized; }
         void ResetWindowResizedFlag() { m_FrameBufferResized = false; }
 

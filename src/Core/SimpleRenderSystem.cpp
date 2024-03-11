@@ -5,6 +5,7 @@
 #define GLM_FORCE_RADIANS
 #define GLM_FORCE_DEPTH_ZERO_TO_ONE
 #include <glm/glm.hpp>
+#include <iostream>
 
 vmv::SimpleRenderSystem::SimpleRenderSystem(VMVDevice& device, VkRenderPass renderPass) : m_VMVDevice{device}
 {
@@ -55,18 +56,14 @@ void vmv::SimpleRenderSystem::DrawGameObjects(VkCommandBuffer commandBuffer,
                                               std::vector<VMVGameObject>& gameObjects,
                                               const VMVCamera& camera)
 {
-    for (VMVGameObject& go : gameObjects)
-    {
-        go.m_Transform.rotation.y += 0.001f;
-        go.m_Transform.rotation.x += 0.0005f;
-    }
-
     m_pVMVPipeline->Bind(commandBuffer);
+
+    glm::mat4 projectionView{camera.GetProjection() * camera.GetView()};
 
     for (VMVGameObject& go : gameObjects)
     {
         SimplePushConstantData push{};
-        push.transform = camera.GetProjection() * go.m_Transform.GetMat();
+        push.transform = projectionView * go.m_Transform.GetMat();
         push.color = go.m_Color;
 
         vkCmdPushConstants(commandBuffer,

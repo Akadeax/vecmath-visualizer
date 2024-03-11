@@ -31,6 +31,7 @@ add_custom_target(
 set(SOURCES
     "main.cpp"
     "VecmathVisualizer.h" "VecmathVisualizer.cpp"
+    "KeyboardMovementController.h" "KeyboardMovementController.cpp"
     "Core/VMVWindow.h" "Core/VMVWindow.cpp"
     "Core/VMVPipeline.h" "Core/VMVPipeline.cpp"
     "Core/VMVDevice.h" "Core/VMVDevice.cpp"

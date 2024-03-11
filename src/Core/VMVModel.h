@@ -20,7 +20,13 @@ namespace vmv
             static std::vector<VkVertexInputAttributeDescription> GetAttributeDescriptions();
         };
 
-        VMVModel(VMVDevice& device, const std::vector<Vertex>& vertices);
+        struct Builder
+        {
+            std::vector<Vertex> vertices{};
+            std::vector<uint32_t> indices{};
+        };
+
+        VMVModel(VMVDevice& device, const Builder& builder);
         ~VMVModel();
 
         VMVModel(const VMVModel&) = delete;
@@ -33,11 +39,19 @@ namespace vmv
 
       private:
         VMVDevice& m_VMVDevice;
+
         VkBuffer m_VertexBuffer;
         VkDeviceMemory m_VertexBufferMemory;
         uint32_t m_VertexCount;
 
         void CreateVertexBuffers(const std::vector<Vertex>& vertices);
+
+        bool m_HasIndexBuffer{false};
+        VkBuffer m_IndexBuffer;
+        VkDeviceMemory m_IndexBufferMemory;
+        uint32_t m_IndexCount;
+
+        void CreateIndexBuffers(const std::vector<uint32_t>& indices);
     };
 } // namespace vmv
 
