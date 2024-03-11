@@ -13,9 +13,8 @@ namespace vmv
         glm::vec3 scale{1.f, 1.f, 1.f};
         glm::vec3 rotation{};
 
-        /// @brief calculates transformation matrix
-        /// @return TRS
         glm::mat4 GetMat();
+        glm::mat3 NormalMatrix();
     };
 
     class VMVGameObject final

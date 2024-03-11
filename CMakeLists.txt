@@ -1,5 +1,7 @@
 cmake_minimum_required(VERSION 3.10)
 
+set(EXECUTABLE_OUTPUT_DIR "${CMAKE_BINARY_DIR}/bin/Debug")
+
 # Project Name
 project(VecMathVisualizer)
 
@@ -23,6 +25,9 @@ find_package(Vulkan REQUIRED)
 
 # Include Directories
 include_directories(${Vulkan_INCLUDE_DIRS})
+include_directories("libs/tiny_obj_loader")
+
+file(COPY ${CMAKE_CURRENT_SOURCE_DIR}/data/ DESTINATION ${EXECUTABLE_OUTPUT_DIR}/data/)
 
 add_subdirectory(src)
 

@@ -1,5 +1,30 @@
 #include "VMVModel.h"
 
+#include "VMVUtils.h"
+
+#define TINYOBJLOADER_IMPLEMENTATION
+#include <tiny_obj_loader.h>
+
+#include <unordered_map>
+
+#define GLM_ENABLE_EXPERIMENTAL
+#include <glm/gtx/hash.hpp>
+
+// Apparently this is the way recommended by https://en.cppreference.com/w/cpp/utility/hash
+// to specify a template specialization for std::hash
+namespace std
+{
+    template <> struct hash<vmv::VMVModel::Vertex>
+    {
+        size_t operator()(const vmv::VMVModel::Vertex& vertex) const
+        {
+            size_t seed{0};
+            vmv::hashCombine(seed, vertex.position, vertex.color, vertex.normal, vertex.uv);
+            return seed;
+        }
+    };
+} // namespace std
+
 vmv::VMVModel::VMVModel(VMVDevice& device, const Builder& builder) : m_VMVDevice{device}
 {
     CreateVertexBuffers(builder.vertices);
@@ -16,6 +41,14 @@ vmv::VMVModel::~VMVModel()
         vkDestroyBuffer(m_VMVDevice.device(), m_IndexBuffer, nullptr);
         vkFreeMemory(m_VMVDevice.device(), m_IndexBufferMemory, nullptr);
     }
+}
+
+std::unique_ptr<vmv::VMVModel> vmv::VMVModel::CreateModelFromFile(VMVDevice& device, const std::string& filePath)
+{
+    Builder builder{};
+    builder.LoadModel(filePath);
+
+    return std::make_unique<VMVModel>(device, builder);
 }
 
 void vmv::VMVModel::Bind(VkCommandBuffer commandBuffer)
@@ -122,16 +155,80 @@ std::vector<VkVertexInputBindingDescription> vmv::VMVModel::Vertex::GetBindingDe
 
 std::vector<VkVertexInputAttributeDescription> vmv::VMVModel::Vertex::GetAttributeDescriptions()
 {
-    std::vector<VkVertexInputAttributeDescription> attributeDescriptions(2);
-    attributeDescriptions[0].binding = 0;
-    attributeDescriptions[0].location = 0;
-    attributeDescriptions[0].format = VK_FORMAT_R32G32B32_SFLOAT;
-    attributeDescriptions[0].offset = offsetof(Vertex, position);
+    std::vector<VkVertexInputAttributeDescription> attributeDescriptions{};
 
-    attributeDescriptions[1].binding = 0;
-    attributeDescriptions[1].location = 1;
-    attributeDescriptions[1].format = VK_FORMAT_R32G32B32_SFLOAT;
-    attributeDescriptions[1].offset = offsetof(Vertex, color);
+    attributeDescriptions.push_back(
+        {0, 0, VK_FORMAT_R32G32B32_SFLOAT, static_cast<uint32_t>(offsetof(Vertex, position))});
+
+    attributeDescriptions.push_back({1, 0, VK_FORMAT_R32G32B32_SFLOAT, static_cast<uint32_t>(offsetof(Vertex, color))});
+
+    attributeDescriptions.push_back(
+        {2, 0, VK_FORMAT_R32G32B32_SFLOAT, static_cast<uint32_t>(offsetof(Vertex, normal))});
+
+    attributeDescriptions.push_back({3, 0, VK_FORMAT_R32G32_SFLOAT, static_cast<uint32_t>(offsetof(Vertex, uv))});
 
     return attributeDescriptions;
+}
+
+void vmv::VMVModel::Builder::LoadModel(const std::string& filePath)
+{
+    using namespace tinyobj;
+    attrib_t attrib;
+    std::vector<shape_t> shapes;
+    std::vector<material_t> materials;
+    std::string warn, err;
+
+    if (!tinyobj::LoadObj(&attrib, &shapes, &materials, &warn, &err, filePath.c_str()))
+    {
+        throw std::runtime_error(warn + err);
+    }
+
+    vertices.clear();
+    indices.clear();
+
+    std::unordered_map<Vertex, uint32_t> uniqueVertices{};
+
+    for (const shape_t& shape : shapes)
+    {
+        for (const index_t& index : shape.mesh.indices)
+        {
+            Vertex vertex{};
+
+            if (index.vertex_index >= 0)
+            {
+                vertex.position = {
+                    attrib.vertices[3 * index.vertex_index + 0],
+                    attrib.vertices[3 * index.vertex_index + 1],
+                    attrib.vertices[3 * index.vertex_index + 2],
+                };
+
+                vertex.color = {
+                    attrib.colors[3 * index.vertex_index + 0],
+                    attrib.colors[3 * index.vertex_index + 1],
+                    attrib.colors[3 * index.vertex_index + 2],
+                };
+            }
+            if (index.normal_index >= 0)
+            {
+                vertex.normal = {
+                    attrib.normals[3 * index.normal_index + 0],
+                    attrib.normals[3 * index.normal_index + 1],
+                    attrib.normals[3 * index.normal_index + 2],
+                };
+            }
+            if (index.texcoord_index >= 0)
+            {
+                vertex.uv = {attrib.texcoords[2 * index.texcoord_index + 0],
+                             attrib.texcoords[2 * index.texcoord_index + 1]};
+            }
+
+            if (uniqueVertices.count(vertex) == 0)
+            {
+                uniqueVertices[vertex] = static_cast<uint32_t>(vertices.size());
+                vertices.push_back(vertex);
+            }
+
+            indices.push_back(uniqueVertices[vertex]);
+        }
+    }
 }

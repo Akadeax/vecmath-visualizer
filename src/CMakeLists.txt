@@ -2,9 +2,6 @@
 set(SHADER_SOURCE_DIR "${CMAKE_CURRENT_SOURCE_DIR}/Shaders")
 set(SHADER_BINARY_DIR "${CMAKE_BINARY_DIR}/bin/Debug/Shaders")
 
-message("========${CMAKE_BINARY_DIR}")
-message("========${CMAKE_BUILD_TYPE}")
-
 set(CMAKE_RUNTIME_OUTPUT_DIRECTORY "${CMAKE_BINARY_DIR}/bin")
 
 file(GLOB_RECURSE GLSL_SOURCE_FILES
@@ -41,10 +38,11 @@ set(SOURCES
     "Core/VMVRenderer.h" "Core/VMVRenderer.cpp"
     "Core/SimpleRenderSystem.h" "Core/SimpleRenderSystem.cpp"
     "Core/VMVCamera.h" "Core/VMVCamera.cpp"
+    "Core/VMVUtils.h"
 )
 
 # Create the executable
-add_executable(${PROJECT_NAME} ${SOURCES} ${GLSL_SOURCE_FILES} )
+add_executable(${PROJECT_NAME} ${SOURCES} ${GLSL_SOURCE_FILES})
 add_dependencies(${PROJECT_NAME} Shaders)
 
 set_property(TARGET ${PROJECT_NAME} PROPERTY COMPILE_WARNING_AS_ERROR ON)

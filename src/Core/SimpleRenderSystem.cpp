@@ -64,7 +64,7 @@ void vmv::SimpleRenderSystem::DrawGameObjects(VkCommandBuffer commandBuffer,
     {
         SimplePushConstantData push{};
         push.transform = projectionView * go.m_Transform.GetMat();
-        push.color = go.m_Color;
+        push.normalMatrix = go.m_Transform.NormalMatrix();
 
         vkCmdPushConstants(commandBuffer,
                            m_PipelineLayout,
