@@ -10,7 +10,7 @@ vmv::VMVGameObject vmv::VMVGameObject::CreateGameObject()
 
 vmv::VMVGameObject::VMVGameObject(id_t id) : m_Id{id} {}
 
-glm::mat4 vmv::Transform::GetMat()
+glm::mat4 vmv::Transform::GetMat() const
 {
     const float c3 = glm::cos(rotation.z);
     const float s3 = glm::sin(rotation.z);
@@ -39,7 +39,7 @@ glm::mat4 vmv::Transform::GetMat()
                      {translation.x, translation.y, translation.z, 1.0f}};
 }
 
-glm::mat3 vmv::Transform::NormalMatrix()
+glm::mat3 vmv::Transform::NormalMatrix() const
 {
     const float c3 = glm::cos(rotation.z);
     const float s3 = glm::sin(rotation.z);

@@ -13,8 +13,8 @@ namespace vmv
         glm::vec3 scale{1.f, 1.f, 1.f};
         glm::vec3 rotation{};
 
-        glm::mat4 GetMat();
-        glm::mat3 NormalMatrix();
+        glm::mat4 GetMat() const;
+        glm::mat3 NormalMatrix() const;
     };
 
     class VMVGameObject final

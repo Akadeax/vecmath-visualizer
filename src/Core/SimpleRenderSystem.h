@@ -26,19 +26,38 @@ namespace vmv
         void DrawGameObjects(VMVFrameInfo& frameInfo, std::vector<VMVGameObject>& gameObjects);
 
       private:
-        struct SimplePushConstantData
+        struct GlobalUbo // explicit because vec4 requires 4N (16byte) alignment
         {
-            glm::mat4 transform{1.f};
-            glm::mat4 normalMatrix{1.f};
+            alignas(16) glm::mat4 view;
+            alignas(16) glm::mat4 proj;
+        };
+        struct ObjectTransformPushConstant
+        {
+            alignas(16) glm::mat4 model{1.f};        // for mvp
+            alignas(16) glm::mat4 normalMatrix{1.f}; // for normal transformation
         };
 
         VMVDevice& m_VMVDevice;
 
         std::unique_ptr<VMVPipeline> m_pVMVPipeline;
+
+        VkDescriptorSetLayout m_DescriptorSetLayout;
         VkPipelineLayout m_PipelineLayout;
+
+        std::vector<std::unique_ptr<VMVBuffer>> m_GlobalUboBuffers{};
+
+        VkDescriptorPool m_DescriptorPool;
+        std::vector<VkDescriptorSet> m_DescriptorSets;
 
         void CreatePipelineLayout();
         void CreatePipeline(VkRenderPass renderPass);
+
+        void CreateDescriptorSetLayout();
+        void CreateUniformBuffers();
+        void CreateDescriptorPool();
+        void CreateDescriptorSets();
+
+        void UpdateGlobalUbo(const VMVFrameInfo& frameInfo);
     };
 } // namespace vmv
 
