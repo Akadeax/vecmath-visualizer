@@ -1,4 +1,5 @@
-#pragma once
+#ifndef VMV_VMVDEVICE_H
+#define VMV_VMVDEVICE_H
 
 #include "VMVWindow.h"
 
@@ -132,3 +133,5 @@ namespace vmv
     };
 
 } // namespace vmv
+
+#endif

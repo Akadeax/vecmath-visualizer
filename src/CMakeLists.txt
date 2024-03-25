@@ -37,6 +37,7 @@ set(SOURCES
     "Core/VMVGameObject.h" "Core/VMVGameObject.cpp"
     "Core/VMVRenderer.h" "Core/VMVRenderer.cpp"
     "Core/SimpleRenderSystem.h" "Core/SimpleRenderSystem.cpp"
+    "Core/RenderSystem2D.h" "Core/RenderSystem2D.cpp"
     "Core/VMVCamera.h" "Core/VMVCamera.cpp"
     "Core/VMVUtils.h"
     "Core/VMVBuffer.h" "Core/VMVBuffer.cpp"

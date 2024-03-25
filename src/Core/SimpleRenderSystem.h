@@ -1,5 +1,5 @@
-#ifndef VMV_SimpleRenderSystem_H
-#define VMV_SimpleRenderSystem_H
+#ifndef VMV_SIMPLERENDERSYSTEM_H
+#define VMV_SIMPLERENDERSYSTEM_H
 
 #include "VMVCamera.h"
 #include "VMVDevice.h"

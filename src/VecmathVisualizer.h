@@ -34,6 +34,7 @@ namespace vmv
         VMVRenderer m_VMVRenderer{m_VMVWindow, m_VMVDevice};
 
         std::vector<VMVGameObject> m_GameObjects;
+        std::vector<VMVGameObject> m_GameObjects2D;
 
         void LoadGameObjects();
     };
